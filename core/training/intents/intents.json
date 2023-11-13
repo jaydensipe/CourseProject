@@ -1,0 +1,93 @@
+{
+    "intents": [
+        {
+            "tag": "turn_light_on",
+            "patterns": [
+                "turn light on",
+                "switch light on",
+                "turn on light",
+                "switch on light",
+                "turn on the light",
+                "switch on the light"
+            ],
+            "responses": [
+                "I'm turning the light on.",
+                "The light is on."
+            ]
+        },
+        {
+            "tag": "turn_light_off",
+            "patterns": [
+                "turn light off",
+                "switch light off",
+                "turn off light",
+                "switch off light",
+                "turn off the light",
+                "switch off the light"
+            ],
+            "responses": [
+                "I'm turning the light off.",
+                "The light is off."
+            ]
+        },
+        {
+            "tag": "set_light_color",
+            "patterns": [
+                "set light color to",
+                "change light color to",
+                "set light to",
+                "change light to",
+                "make light",
+                "make light color",
+                "make my light",
+                "set the light color to",
+                "change the light color to",
+                "set the light to",
+                "change the light to",
+                "make the light",
+                "set my light color to",
+                "change my light color to",
+                "set my light to"
+            ],
+            "responses": [
+                "Changing the color of the light.",
+                "The light is now."
+            ]
+        },
+        {
+            "tag": "shut_down",
+            "patterns": [
+                "shut down",
+                "shutdown",
+                "shut down now",
+                "shutdown now",
+                "shut down immediately",
+                "shutdown immediately"
+            ],
+            "responses": [
+                "Shutting down. Have a good day!",
+                "Shutting down. Goodbye!",
+                "Shutting down. See you later!"
+            ]
+        },
+        {
+            "tag": "talk_to_gpt",
+            "patterns": [
+                "hey squire",
+                "hello squire",
+                "hi squire",
+                "hey squire how are you",
+                "squire can you tell me",
+                "squire what is",
+                "squire what are",
+                "how can you",
+                "what is",
+                "what are",
+                "how are you",
+                "who is",
+                "what do you know about"
+            ],
+            "responses": []
+        }
+    ]
+}
