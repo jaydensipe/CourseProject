@@ -1,18 +1,18 @@
-from langchain import LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
 from langchain.llms import OpenAI
 from enum import Enum
 from components.mouth import Mouth
+from helpers.helpers import Helpers
+from tensorflow.keras.models import load_model
 import preprogrammed.responses as responses
 import os
-from external.lifx import LIFX
-import random
 import json
 import pickle
 import numpy as np
-import nltk
-from nltk.stem import WordNetLemmatizer
-from tensorflow.keras.models import load_model
+import random
+from external.lifx import LIFX
 
 
 class Brain:
@@ -23,7 +23,6 @@ class Brain:
         ALERT = 3
 
     current_state = BrainState.THINKING
-    lamatizer = WordNetLemmatizer()
     intents = json.loads(
         open("core/training/intents/intents.json").read()
     )  # Load intents.json file
@@ -31,22 +30,28 @@ class Brain:
     classes = pickle.load(open("core/training/intents/classes.pkl", "rb"))
     model = load_model("core/training/intents/squire_assistant.keras")
 
-    def __init__(self, name: str, personality: str, mouth: Mouth) -> None:
+    def __init__(self, name: str, personality: str) -> None:
         self.name = name
         self.personality = personality
-        self.mouth = mouth
 
     # Awakens Squire
-    def awaken(self):
+    def awaken(self) -> None:
         print("Hello, my name is " + self.name + ". How can I help you?")
 
+        # Loads external pieces
+        self.__load_external()
+
+    def __load_external(self) -> None:
+
         # Initialize GPT
+        global receptor
         receptor = self.__initialize_gpt()
 
-        # Begin listening and responding
-        self.__interpret_and_reflect(receptor)
+        # Initialize LIFX
+        global lifx
+        lifx = LIFX()
 
-    def __initialize_gpt(self):
+    def __initialize_gpt(self) -> None:
         prompt = PromptTemplate(
             input_variables=["history", "human_input"],
             template=self.personality,
@@ -63,33 +68,30 @@ class Brain:
 
         return chatgpt_chain
 
-    def __interpret_and_reflect(self, receptor: LLMChain) -> None:
-        lifx = LIFX()
+    def interpret_and_reflect(self, human_input: str) -> None:
+        if self.current_state != Brain.BrainState.ALERT:
+            self.current_state = Brain.BrainState.THINKING
 
-        while True:
-            if self.current_state != Brain.BrainState.ALERT:
-                self.current_state = Brain.BrainState.THINKING
+        try:
+            # Process the input
+            self.__process_input(human_input=human_input)
+        except Exception as e:
+            print(
+                "Sorry, an error has occurred while processing your input. Reason: " + str(e))
 
-            print("Speak Anything: ")
-            try:
-                # Process the input
-                self.__process_input(
-                    receptor=receptor, lifx=lifx, human_input=str(input()))
-            except Exception as e:
-                print("Sorry, an error has occurred while processing your input. Reason: " + str(e))
-
-    def __process_input(self, receptor: LLMChain, lifx: LIFX, human_input: str) -> None:
+    def __process_input(self, human_input: str) -> None:
         # Get intent from speech
         intent = self.__predict_class(sentence=human_input)
 
         # If we are in Alert, disregard messages unless they are to end the alert
         if self.current_state == Brain.BrainState.ALERT:
             if intent[0]["intent"] == "end_alert_response":
-                self.mouth.speak(self.__get_response(intent_list=intent))
+                Mouth.speak(self.__get_response(intent_list=intent))
+
                 self.__reset_state()
                 return
 
-            self.mouth.speak(responses.continued_alert_response)
+            Mouth.speak(responses.continued_alert_response)
             return
 
         # Begin speaking
@@ -104,24 +106,18 @@ class Brain:
             case "set_light_color":
                 lifx.set_color(response=human_input)
             case "initiate_alert_response":
-                self.mouth.speak(responses.initiated_alert)
                 self.current_state = Brain.BrainState.ALERT
+                Mouth.speak(responses.initiated_alert)
             case "shut_down":
                 exit()
             case "talk_to_gpt":
-                self.mouth.speak(receptor.predict(human_input=human_input))
+                Mouth.speak(receptor.predict(human_input=human_input))
             case _:
-                self.mouth.speak(receptor.predict(human_input=human_input))
+                # Default to GPT if cannot match intent
+                Mouth.speak(receptor.predict(human_input=human_input))
 
-    def __clean_up_sentence(self, sentence: str):
-        sentence_words = nltk.word_tokenize(sentence)
-        sentence_words = [self.lamatizer.lemmatize(
-            word) for word in sentence_words]
-
-        return sentence_words
-
-    def __bag_of_words(self, sentence: str):
-        sentence_words = self.__clean_up_sentence(sentence)
+    def __bag_of_words(self, sentence: str) -> None:
+        sentence_words = Helpers.clean_up_sentence(sentence)
         bag = [0] * len(self.words)
         for w in sentence_words:
             for i, word in enumerate(self.words):
@@ -130,7 +126,7 @@ class Brain:
 
         return np.array(bag)
 
-    def __predict_class(self, sentence: str):
+    def __predict_class(self, sentence: str) -> None:
         bow = self.__bag_of_words(sentence)
         res = self.model.predict(np.array([bow]))[0]
         ERROR_THRESHOLD = 0.25
@@ -155,5 +151,6 @@ class Brain:
         return result
 
     # Reset the state of the brain to THINKING
+
     def __reset_state(self) -> None:
         self.current_state = Brain.BrainState.THINKING

@@ -1,7 +1,10 @@
-class Mouth:
-    def __init__(self) -> None:
-        pass
+import handler
 
+class Mouth:
+    
     # Speak words
-    def speak(self, words: str) -> None:
-        print(words)
+    @staticmethod
+    def speak(words: str) -> None:
+        print("Squire: " + words)
+        
+        handler.receive_chatbot_message(message=words)

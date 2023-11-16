@@ -8,13 +8,13 @@ class LIFX:
     def __init__(self):
         self.token = os.getenv("lifx_token")
 
-    def get_status(self):
+    def get_status(self) -> None:
         response = requests.get(
             "https://api.lifx.com/v1/lights/all", auth=(self.token, "")
         )
         print(response.json())
 
-    def turn_on(self):
+    def turn_on(self) -> None:
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",
             auth=(self.token, ""),
@@ -22,7 +22,7 @@ class LIFX:
         )
         print(response.json())
 
-    def turn_off(self):
+    def turn_off(self) -> None:
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",
             auth=(self.token, ""),
@@ -30,7 +30,7 @@ class LIFX:
         )
         print(response.json())
 
-    def set_color(self, response: str):
+    def set_color(self, response: str) -> None:
         color = [i for i in response.split(" ") if self.__check_color(i)]
         print
         response = requests.put(
@@ -41,7 +41,7 @@ class LIFX:
         print(response.json())
 
     @staticmethod
-    def __check_color(color):
+    def __check_color(color) -> bool:
         try:
             Color(color)
             return True

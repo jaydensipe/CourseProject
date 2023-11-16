@@ -8,7 +8,15 @@
                 "turn on light",
                 "switch on light",
                 "turn on the light",
-                "switch on the light"
+                "switch on the light",
+                "activate the light",
+                "power on the light",
+                "illuminate the room",
+                "light up the space",
+                "enable the light",
+                "start the lighting",
+                "engage the light",
+                "initiate the light"
             ],
             "responses": [
                 "I'm turning the light on.",
@@ -23,7 +31,15 @@
                 "turn off light",
                 "switch off light",
                 "turn off the light",
-                "switch off the light"
+                "switch off the light",
+                "deactivate the light",
+                "power off the light",
+                "darken the room",
+                "extinguish the light",
+                "disable the light",
+                "stop the lighting",
+                "disengage the light",
+                "terminate the light"
             ],
             "responses": [
                 "I'm turning the light off.",
@@ -47,7 +63,22 @@
                 "make the light",
                 "set my light color to",
                 "change my light color to",
-                "set my light to"
+                "set my light to",
+                "adjust light color to",
+                "modify light color to",
+                "alter light color to",
+                "assign light color to",
+                "shift light color to",
+                "transform light color to",
+                "adapt light color to",
+                "arrange light color to",
+                "configure light color to",
+                "customize light color to",
+                "assign a new color to light",
+                "update light color to",
+                "set my preferred light color to",
+                "change the ambiance to",
+                "select a color for the light"
             ],
             "responses": [
                 "Changing the color of the light.",
