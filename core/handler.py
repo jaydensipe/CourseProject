@@ -28,11 +28,14 @@ def __startup_ui() -> None:
 def submit_chatbot_request():
     request = ui.entry.get()
     ui.entry.delete(0, "end")
+    ui.insert_message(request, True)
 
-    squire.interpret_and_reflect(request)
+    threading.Thread(target=squire.interpret_and_reflect,
+                     args=(request,)).start()
+
 
 def receive_chatbot_message(message: str):
-    ui.textbox.insert("end", message)
+    ui.insert_message(message)
 
 
 @staticmethod

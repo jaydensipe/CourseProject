@@ -36,8 +36,6 @@ class Brain:
 
     # Awakens Squire
     def awaken(self) -> None:
-        print("Hello, my name is " + self.name + ". How can I help you?")
-
         # Loads external pieces
         self.__load_external()
 
