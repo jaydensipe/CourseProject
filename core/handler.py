@@ -28,10 +28,15 @@ def __startup_ui() -> None:
 def submit_chatbot_request():
     request = ui.entry.get()
     ui.entry.delete(0, "end")
-    ui.insert_message(request, True)
 
-    threading.Thread(target=squire.interpret_and_reflect,
-                     args=(request,)).start()
+    if (request == "" or request == None):
+        ui.insert_message(request, is_error=True,
+                          error_message="Please enter a command.")
+    else:
+        ui.insert_message(request, sent_by_user=True)
+
+        threading.Thread(target=squire.interpret_and_reflect,
+                         args=(request,)).start()
 
 
 def receive_chatbot_message(message: str):

@@ -1,3 +1,4 @@
+import signal
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -74,7 +75,7 @@ class Brain:
             # Process the input
             self.__process_input(human_input=human_input)
         except Exception as e:
-            print(
+            Mouth.speak(
                 "Sorry, an error has occurred while processing your input. Reason: " + str(e))
 
     def __process_input(self, human_input: str) -> None:
@@ -107,12 +108,14 @@ class Brain:
                 self.current_state = Brain.BrainState.ALERT
                 Mouth.speak(responses.initiated_alert)
             case "shut_down":
-                exit()
+                os.kill(os.getpid(), signal.SIGTERM)
             case "talk_to_gpt":
                 Mouth.speak(receptor.predict(human_input=human_input))
             case _:
                 # Default to GPT if cannot match intent
                 Mouth.speak(receptor.predict(human_input=human_input))
+
+        Mouth.speak(self.__get_response(intent_list=intent))
 
     def __bag_of_words(self, sentence: str) -> None:
         sentence_words = Helpers.clean_up_sentence(sentence)
@@ -133,6 +136,7 @@ class Brain:
         results.sort(key=lambda x: x[1], reverse=True)
         return_list = []
         for r in results:
+            print(r)
             return_list.append(
                 {"intent": self.classes[r[0]], "probability": str(r[1])})
 
@@ -143,12 +147,15 @@ class Brain:
         list_of_intents = self.intents["intents"]
         for i in list_of_intents:
             if i["tag"] == tag:
+                if (len(i["responses"]) == 0):
+                    result = ""
+                    break
+
                 result = random.choice(i["responses"])
                 break
 
         return result
 
     # Reset the state of the brain to THINKING
-
     def __reset_state(self) -> None:
         self.current_state = Brain.BrainState.THINKING

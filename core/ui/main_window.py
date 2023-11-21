@@ -1,3 +1,4 @@
+import datetime
 import customtkinter
 import handler
 
@@ -5,9 +6,11 @@ import handler
 customtkinter.set_appearance_mode("Dark")
 
 # Themes: "blue" (standard), "green", "dark-blue"
-customtkinter.set_default_color_theme("blue")
+customtkinter.set_default_color_theme("core/ui/custom_theme.json")
 
 customtkinter.set_widget_scaling(float(1.3))
+
+last_sent_time_message = datetime.datetime.now()
 
 
 class MainWindow(customtkinter.CTk):
@@ -50,7 +53,7 @@ class MainWindow(customtkinter.CTk):
 
         # Create main entry and button
         self.entry = customtkinter.CTkEntry(
-            self, placeholder_text="Please type a command...")
+            self, placeholder_text="Please type a command...", corner_radius=8, border_width=0)
         self.entry.grid(row=3, column=1, columnspan=2, padx=(
             20, 0), pady=(20, 20), sticky="nsew")
 
@@ -60,10 +63,12 @@ class MainWindow(customtkinter.CTk):
         self.main_button_1.grid(row=3, column=3, padx=(
             20, 20), pady=(20, 20), sticky="nsew")
 
+        self.bind('<Return>', lambda event: handler.submit_chatbot_request())
+
         # Create textbox
         self.textbox = customtkinter.CTkScrollableFrame(self, width=300)
-        self.textbox.grid(row=0, column=1, columnspan=3, padx=(
-            20, 0), pady=(20, 0), sticky="nsew")
+        self.textbox.grid(row=0, rowspan=2, column=1, columnspan=3, padx=(
+            20, 20), pady=(20, 0), sticky="nsew")
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
@@ -72,17 +77,33 @@ class MainWindow(customtkinter.CTk):
         new_scaling_float = float(new_scaling.replace("x", ""))
         customtkinter.set_widget_scaling(float(new_scaling_float) + 0.3)
 
-    from PIL import Image, ImageTk
-    from tkinter import LEFT
-
-    def insert_message(self, message: str, sent_by_user: bool = False):
+    def insert_message(self, message: str, sent_by_user: bool = False, is_error: bool = False, error_message: str = None):
         frame = customtkinter.CTkFrame(self.textbox)
         frame.pack(fill='x')
 
+        # TODO: FIX THIS
+        # Create the timestamp label
+        if (last_sent_time_message + datetime.timedelta(seconds=5) > datetime.datetime.now()):
+            timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            timestamp_label = customtkinter.CTkLabel(frame, text=timestamp)
+            timestamp_label.pack()
+
         # Create the text label
         if sent_by_user:
-            label = customtkinter.CTkLabel(frame, text=message, anchor='e')
+            label = customtkinter.CTkLabel(frame, text=message.strip(
+            ), anchor='e', fg_color=("#b9becc", "#112546"), corner_radius=8)
+            label.pack(anchor='e', padx=10, pady=10)
         else:
-            label = customtkinter.CTkLabel(frame, text="🤖" + message, anchor='w')
+            if (is_error):
+                label = customtkinter.CTkLabel(frame, text=error_message.strip(
+                ), anchor='w', fg_color=("#e57266", "#e74c3c"), corner_radius=8)
+            else:
+                label = customtkinter.CTkLabel(frame, text=message.strip(
+                ), anchor='w', fg_color=("#f0f5ff", "#6993ff"), corner_radius=8)
+            label.pack(anchor='w', padx=10, pady=10, ipadx=10, ipady=10)
 
-        label.pack(fill='x')
+        self.textbox._parent_canvas.yview_moveto(1.0)
+
+        # Bind a function to the <Configure> event
+        label.bind('<Configure>', lambda event: label.configure(
+            wraplength=label.winfo_width()))
