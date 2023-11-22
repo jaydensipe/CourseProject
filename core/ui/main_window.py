@@ -1,6 +1,7 @@
 import datetime
 import customtkinter
 import handler
+from PIL import Image
 
 # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("Dark")
@@ -57,17 +58,28 @@ class MainWindow(customtkinter.CTk):
         self.entry.grid(row=3, column=1, columnspan=2, padx=(
             20, 0), pady=(20, 20), sticky="nsew")
 
+        self.button_image = customtkinter.CTkImage(
+            Image.open("core/ui/images/mic.png"), size=(18, 18))
+
+        self.stop_image = customtkinter.CTkImage(
+            Image.open("core/ui/images/stop.png"), size=(18, 18))
+
+        self.mic_button = customtkinter.CTkButton(
+            master=self, text="", width=24, height=24, image=self.button_image, border_width=2, command=self.listen_with_mic)
+        self.mic_button.grid(row=3, column=3, padx=(
+            20, 0), pady=(20, 20), sticky="nsew")
+
         self.main_button_1 = customtkinter.CTkButton(text="Submit",
                                                      master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=handler.submit_chatbot_request)
 
-        self.main_button_1.grid(row=3, column=3, padx=(
+        self.main_button_1.grid(row=3, column=4, padx=(
             20, 20), pady=(20, 20), sticky="nsew")
 
         self.bind('<Return>', lambda event: handler.submit_chatbot_request())
 
         # Create textbox
         self.textbox = customtkinter.CTkScrollableFrame(self, width=300)
-        self.textbox.grid(row=0, rowspan=2, column=1, columnspan=3, padx=(
+        self.textbox.grid(row=0, rowspan=2, column=1, columnspan=4, padx=(
             20, 20), pady=(20, 0), sticky="nsew")
 
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -76,6 +88,14 @@ class MainWindow(customtkinter.CTk):
     def change_scaling_event(self, new_scaling: str):
         new_scaling_float = float(new_scaling.replace("x", ""))
         customtkinter.set_widget_scaling(float(new_scaling_float) + 0.3)
+
+    def listen_with_mic(self) -> None:
+        self.mic_button.configure(fg_color="red")
+
+        handler.listen_with_mic()
+
+    def stop_listening(self) -> None:
+        self.mic_button.configure(fg_color="default_color")
 
     def insert_message(self, message: str, sent_by_user: bool = False, is_error: bool = False, error_message: str = None):
         frame = customtkinter.CTkFrame(self.textbox)

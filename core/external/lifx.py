@@ -32,7 +32,6 @@ class LIFX:
 
     def set_color(self, response: str) -> None:
         color = [i for i in response.split(" ") if self.__check_color(i)]
-        print
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",
             auth=(self.token, ""),

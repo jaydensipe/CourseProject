@@ -1,6 +1,7 @@
 from ui.main_window import MainWindow
 from components.brain import Brain
 import threading
+import speech_recognition as sr
 
 squire = Brain(
     name="Squire",
@@ -14,7 +15,7 @@ squire = Brain(
 )
 
 
-def __startup_squire() -> None:
+def startup_squire() -> None:
     squire.awaken()
 
 
@@ -30,23 +31,43 @@ def submit_chatbot_request():
     ui.entry.delete(0, "end")
 
     if (request == "" or request == None):
-        ui.insert_message(request, is_error=True,
-                          error_message="Please enter a command.")
+        receive_chatbot_message(request, is_error=True,
+                                error_message="Please enter a command.")
     else:
-        ui.insert_message(request, sent_by_user=True)
+        receive_chatbot_message(request, sent_by_user=True)
 
         threading.Thread(target=squire.interpret_and_reflect,
                          args=(request,)).start()
 
 
-def receive_chatbot_message(message: str):
-    ui.insert_message(message)
+def receive_chatbot_message(message: str, sent_by_user: bool = False, is_error: bool = False, error_message: str = None):
+    ui.insert_message(message, sent_by_user=sent_by_user,
+                      is_error=is_error, error_message=error_message)
+
+
+def listen_with_mic() -> None:
+    threading.Thread(target=__listen_with_mic, args=()).start()
+
+
+def __listen_with_mic() -> None:
+    ui.entry.insert(0, "Listening...")
+
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        r.adjust_for_ambient_noise(source)
+        audio = r.listen(source)
+
+    try:
+        request = r.recognize_google(audio)
+        ui.entry.delete(0, 'end')
+        ui.entry.insert(0, request)
+        ui.stop_listening()
+    except sr.UnknownValueError:
+        receive_chatbot_message(
+            "Sorry, I could not understand that.", is_error=True, error_message="Sorry, I could not understand that.")
 
 
 @staticmethod
 def start_threads() -> None:
-    bot_thread = threading.Thread(target=__startup_squire, args=())
     ui_thread = threading.Thread(target=__startup_ui, args=())
-
-    bot_thread.start()
     ui_thread.start()

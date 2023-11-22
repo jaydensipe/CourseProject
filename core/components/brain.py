@@ -76,7 +76,7 @@ class Brain:
             self.__process_input(human_input=human_input)
         except Exception as e:
             Mouth.speak(
-                "Sorry, an error has occurred while processing your input. Reason: " + str(e))
+                "Sorry, an error has occurred while processing your input. Reason: " + str(e), is_error=True)
 
     def __process_input(self, human_input: str) -> None:
         # Get intent from speech
@@ -136,7 +136,6 @@ class Brain:
         results.sort(key=lambda x: x[1], reverse=True)
         return_list = []
         for r in results:
-            print(r)
             return_list.append(
                 {"intent": self.classes[r[0]], "probability": str(r[1])})
 
