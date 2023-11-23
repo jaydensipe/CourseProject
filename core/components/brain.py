@@ -49,6 +49,7 @@ class Brain:
         lifx = LIFX()
         self.external_api_tokens['lifx'] = lifx.token
 
+    # TODO: Update this to use the new LCEL
     def __initialize_gpt(self) -> None:
         prompt = PromptTemplate(
             input_variables=["history", "human_input"],

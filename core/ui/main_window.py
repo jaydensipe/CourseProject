@@ -11,8 +11,6 @@ customtkinter.set_default_color_theme("core/ui/custom_theme.json")
 
 customtkinter.set_widget_scaling(float(1.3))
 
-last_sent_time_message = datetime.datetime.now()
-
 
 class MainWindow(customtkinter.CTk):
     def __init__(self, external_api_tokens: dict = {}, *args, **kwargs):
@@ -21,6 +19,7 @@ class MainWindow(customtkinter.CTk):
         # Configure window
         self.title("Squire: Chat Assistant")
         self.external_api_tokens = external_api_tokens
+        self.last_sent_time_message = datetime.datetime.now()
         self.geometry(f"{1280}x{720}")
         self.minsize(800, 600)
         self.grid_columnconfigure(1, weight=1)
@@ -128,9 +127,8 @@ class MainWindow(customtkinter.CTk):
         frame = customtkinter.CTkFrame(self.textbox)
         frame.pack(fill='x')
 
-        # TODO: FIX THIS
         # Create the timestamp label
-        if (last_sent_time_message + datetime.timedelta(seconds=5) > datetime.datetime.now()):
+        if (self.last_sent_time_message + datetime.timedelta(seconds=10) < datetime.datetime.now()):
             timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             timestamp_label = customtkinter.CTkLabel(frame, text=timestamp)
             timestamp_label.pack()
@@ -154,6 +152,8 @@ class MainWindow(customtkinter.CTk):
         # Bind a function to the <Configure> event
         frame.bind('<Configure>', lambda event: label.configure(
             wraplength=frame.winfo_width() - 300))
+
+        self.last_sent_time_message = datetime.datetime.now()
 
     def load_external_api_buttons(self) -> None:
         pady = 0
