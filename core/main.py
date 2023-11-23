@@ -10,4 +10,4 @@ def main() -> None:
 if __name__ == "__main__":
     main()
     handler.startup_squire()
-    handler.start_threads()
+    handler.start_threads(handler.squire.external_api_tokens)

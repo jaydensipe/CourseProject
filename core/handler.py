@@ -19,16 +19,15 @@ def startup_squire() -> None:
     squire.awaken()
 
 
-def __startup_ui() -> None:
+def __startup_ui(external_apis: dict) -> None:
     global ui
 
-    ui = MainWindow()
+    ui = MainWindow(external_api_tokens=external_apis)
     ui.mainloop()
 
 
-def submit_chatbot_request():
-    request = ui.entry.get()
-    ui.entry.delete(0, "end")
+def submit_chatbot_request() -> None:
+    request = ui.fetch_message()
 
     if (request == "" or request == None):
         receive_chatbot_message(request, is_error=True,
@@ -46,28 +45,28 @@ def receive_chatbot_message(message: str, sent_by_user: bool = False, is_error: 
 
 
 def listen_with_mic() -> None:
-    threading.Thread(target=__listen_with_mic, args=()).start()
+    mic_thread = threading.Thread(target=__listen_with_mic, args=())
+    mic_thread.start()
 
 
 def __listen_with_mic() -> None:
-    ui.entry.insert(0, "Listening...")
-
     r = sr.Recognizer()
     with sr.Microphone() as source:
         r.adjust_for_ambient_noise(source)
         audio = r.listen(source)
-
     try:
         request = r.recognize_google(audio)
-        ui.entry.delete(0, 'end')
-        ui.entry.insert(0, request)
         ui.stop_listening()
+
+        ui.entry.insert(0, request)
     except sr.UnknownValueError:
         receive_chatbot_message(
             "Sorry, I could not understand that.", is_error=True, error_message="Sorry, I could not understand that.")
 
+        ui.stop_listening()
+
 
 @staticmethod
-def start_threads() -> None:
-    ui_thread = threading.Thread(target=__startup_ui, args=())
+def start_threads(external_apis: dict) -> None:
+    ui_thread = threading.Thread(target=__startup_ui, args=(external_apis,))
     ui_thread.start()

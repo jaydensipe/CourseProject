@@ -9,10 +9,7 @@ class Mouth:
         if (words == "" or words == None):
             return
 
-        if is_error:
-            handler.receive_chatbot_message(
-                message=words, is_error=True, error_message=words)
-        else:
-            handler.receive_chatbot_message(message=words)
+        handler.receive_chatbot_message(
+            message=words, is_error=is_error, error_message=words)
 
         print("Squire: " + words)

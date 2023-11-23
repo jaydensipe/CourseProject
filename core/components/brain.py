@@ -7,7 +7,6 @@ from enum import Enum
 from components.mouth import Mouth
 from helpers.helpers import Helpers
 from tensorflow.keras.models import load_model
-import preprogrammed.responses as responses
 import os
 import json
 import pickle
@@ -21,7 +20,6 @@ class Brain:
     class BrainState(Enum):
         THINKING = 1
         SPEAKING = 2
-        ALERT = 3
 
     current_state = BrainState.THINKING
     intents = json.loads(
@@ -30,6 +28,7 @@ class Brain:
     words = pickle.load(open("core/training/intents/words.pkl", "rb"))
     classes = pickle.load(open("core/training/intents/classes.pkl", "rb"))
     model = load_model("core/training/intents/squire_assistant.keras")
+    external_api_tokens = {}
 
     def __init__(self, name: str, personality: str) -> None:
         self.name = name
@@ -41,7 +40,6 @@ class Brain:
         self.__load_external()
 
     def __load_external(self) -> None:
-
         # Initialize GPT
         global receptor
         receptor = self.__initialize_gpt()
@@ -49,6 +47,7 @@ class Brain:
         # Initialize LIFX
         global lifx
         lifx = LIFX()
+        self.external_api_tokens['lifx'] = lifx.token
 
     def __initialize_gpt(self) -> None:
         prompt = PromptTemplate(
@@ -68,8 +67,7 @@ class Brain:
         return chatgpt_chain
 
     def interpret_and_reflect(self, human_input: str) -> None:
-        if self.current_state != Brain.BrainState.ALERT:
-            self.current_state = Brain.BrainState.THINKING
+        self.current_state = Brain.BrainState.THINKING
 
         try:
             # Process the input
@@ -82,31 +80,18 @@ class Brain:
         # Get intent from speech
         intent = self.__predict_class(sentence=human_input)
 
-        # If we are in Alert, disregard messages unless they are to end the alert
-        if self.current_state == Brain.BrainState.ALERT:
-            if intent[0]["intent"] == "end_alert_response":
-                Mouth.speak(self.__get_response(intent_list=intent))
-
-                self.__reset_state()
-                return
-
-            Mouth.speak(responses.continued_alert_response)
-            return
-
         # Begin speaking
         self.current_state = Brain.BrainState.SPEAKING
 
-        # Match intent to an action
+        # Match intent to an action and speak
+        self.__match_intent(intent=intent, human_input=human_input)
+        Mouth.speak(self.__get_response(intent_list=intent))
+
+    def __match_intent(self, intent, human_input: str = "") -> None:
         match (intent[0]["intent"]):
-            case "turn_light_on":
-                lifx.turn_on()
-            case "turn_light_off":
-                lifx.turn_off()
-            case "set_light_color":
-                lifx.set_color(response=human_input)
-            case "initiate_alert_response":
-                self.current_state = Brain.BrainState.ALERT
-                Mouth.speak(responses.initiated_alert)
+            case "turn_light_on" | "turn_light_off" | "set_light_color":
+                lifx.process_input(
+                    intent=intent[0]["intent"], human_input=human_input)
             case "shut_down":
                 os.kill(os.getpid(), signal.SIGTERM)
             case "talk_to_gpt":
@@ -114,8 +99,6 @@ class Brain:
             case _:
                 # Default to GPT if cannot match intent
                 Mouth.speak(receptor.predict(human_input=human_input))
-
-        Mouth.speak(self.__get_response(intent_list=intent))
 
     def __bag_of_words(self, sentence: str) -> None:
         sentence_words = Helpers.clean_up_sentence(sentence)

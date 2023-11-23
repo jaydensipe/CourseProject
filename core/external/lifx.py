@@ -2,11 +2,27 @@ import requests
 import os
 from colour import Color
 import webcolors
+from components.mouth import Mouth
 
 
 class LIFX:
     def __init__(self):
         self.token = os.getenv("lifx_token")
+
+    def process_input(self, intent, human_input: str) -> None:
+        if (self.token == None or self.token == ""):
+            raise Exception(
+                "Please enable and provide a LIFX token.")
+
+        match intent:
+            case "turn_light_on":
+                self.__turn_on()
+            case "turn_light_off":
+                self.__turn_off()
+            case "set_light_color":
+                self.__set_color(human_input)
+            case _:
+                print("External Module (LIFX): Cannot match intent.")
 
     def get_status(self) -> None:
         response = requests.get(
@@ -14,7 +30,7 @@ class LIFX:
         )
         print(response.json())
 
-    def turn_on(self) -> None:
+    def __turn_on(self) -> None:
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",
             auth=(self.token, ""),
@@ -22,7 +38,7 @@ class LIFX:
         )
         print(response.json())
 
-    def turn_off(self) -> None:
+    def __turn_off(self) -> None:
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",
             auth=(self.token, ""),
@@ -30,7 +46,7 @@ class LIFX:
         )
         print(response.json())
 
-    def set_color(self, response: str) -> None:
+    def __set_color(self, response: str) -> None:
         color = [i for i in response.split(" ") if self.__check_color(i)]
         response = requests.put(
             "https://api.lifx.com/v1/lights/all/state",

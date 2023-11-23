@@ -15,12 +15,14 @@ last_sent_time_message = datetime.datetime.now()
 
 
 class MainWindow(customtkinter.CTk):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, external_api_tokens: dict = {}, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         # Configure window
         self.title("Squire: Chat Assistant")
+        self.external_api_tokens = external_api_tokens
         self.geometry(f"{1280}x{720}")
+        self.minsize(800, 600)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure((0, 1, 2), weight=1)
 
@@ -32,9 +34,12 @@ class MainWindow(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
 
         self.logo_label = customtkinter.CTkLabel(
-            self.sidebar_frame, text="Settings", font=customtkinter.CTkFont(size=24, weight="bold"))
+            self.sidebar_frame, text="Integrations", font=customtkinter.CTkFont(size=24, weight="bold", underline=True))
 
-        self.logo_label.grid(row=0, column=0, padx=10, pady=(20, 10))
+        self.logo_label.grid(row=0, column=0, padx=10, pady=(20, 0))
+
+        # External Integrations
+        self.load_external_api_buttons()
 
         self.appearance_mode_label = customtkinter.CTkLabel(
             self.sidebar_frame, text="Appearance Mode:", anchor="w")
@@ -42,14 +47,14 @@ class MainWindow(customtkinter.CTk):
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
 
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Dark", "Light", "System"],
-                                                                       command=self.change_appearance_mode_event)
+                                                                       command=self.__change_appearance_mode_event)
         self.appearance_mode_optionemenu.grid(
             row=6, column=0, padx=20, pady=(10, 10))
         self.scaling_label = customtkinter.CTkLabel(
             self.sidebar_frame, text="UI Scaling:", anchor="w")
         self.scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
         self.scaling_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["1.0x", "1.1x", "1.2x", "1.3x"],
-                                                               command=self.change_scaling_event)
+                                                               command=self.__change_scaling_event)
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 
         # Create main entry and button
@@ -61,13 +66,14 @@ class MainWindow(customtkinter.CTk):
         self.button_image = customtkinter.CTkImage(
             Image.open("core/ui/images/mic.png"), size=(18, 18))
 
-        self.stop_image = customtkinter.CTkImage(
-            Image.open("core/ui/images/stop.png"), size=(18, 18))
-
         self.mic_button = customtkinter.CTkButton(
-            master=self, text="", width=24, height=24, image=self.button_image, border_width=2, command=self.listen_with_mic)
+            master=self, text="", width=24, height=24, image=self.button_image, border_width=2, command=self.__listen_with_mic)
         self.mic_button.grid(row=3, column=3, padx=(
             20, 0), pady=(20, 20), sticky="nsew")
+
+        self.is_talking = False
+
+        self.original_fg_color = self.mic_button.cget('fg_color')
 
         self.main_button_1 = customtkinter.CTkButton(text="Submit",
                                                      master=self, fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"), command=handler.submit_chatbot_request)
@@ -82,20 +88,41 @@ class MainWindow(customtkinter.CTk):
         self.textbox.grid(row=0, rowspan=2, column=1, columnspan=4, padx=(
             20, 20), pady=(20, 0), sticky="nsew")
 
-    def change_appearance_mode_event(self, new_appearance_mode: str):
+    def __change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
-    def change_scaling_event(self, new_scaling: str):
+    def __change_scaling_event(self, new_scaling: str):
         new_scaling_float = float(new_scaling.replace("x", ""))
         customtkinter.set_widget_scaling(float(new_scaling_float) + 0.3)
 
-    def listen_with_mic(self) -> None:
+    def fetch_message(self) -> str:
+        msg = self.entry.get()
+        self.entry.delete(0, "end")
+
+        return msg
+
+    def __listen_with_mic(self) -> None:
+        if (self.is_talking):
+            self.stop_listening()
+            return
+
+        self.is_talking = True
         self.mic_button.configure(fg_color="red")
+        self.entry.delete(0, 'end')
+        self.entry.insert(0, "Listening...")
+        self.entry.configure(state="disabled")
+        self.main_button_1.configure(state="disabled")
 
         handler.listen_with_mic()
 
     def stop_listening(self) -> None:
-        self.mic_button.configure(fg_color="default_color")
+        self.is_talking = False
+
+        self.entry.configure(state="normal")
+        self.entry.delete(0, 'end')
+        self.main_button_1.configure(state="normal")
+
+        self.mic_button.configure(fg_color=self.original_fg_color)
 
     def insert_message(self, message: str, sent_by_user: bool = False, is_error: bool = False, error_message: str = None):
         frame = customtkinter.CTkFrame(self.textbox)
@@ -125,5 +152,25 @@ class MainWindow(customtkinter.CTk):
         self.textbox._parent_canvas.yview_moveto(1.0)
 
         # Bind a function to the <Configure> event
-        label.bind('<Configure>', lambda event: label.configure(
-            wraplength=label.winfo_width()))
+        frame.bind('<Configure>', lambda event: label.configure(
+            wraplength=frame.winfo_width() - 300))
+
+    def load_external_api_buttons(self) -> None:
+        pady = 0
+        for key, value in self.external_api_tokens.items():
+            if (value != ''):
+                customtkinter.CTkButton(text=str.upper(key),
+                                        master=self, fg_color="#06b006", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda: self.set_external_api(key)).grid(row=0, column=0, padx=(
+                                            20, 20), pady=(pady, 0))
+            else:
+                customtkinter.CTkButton(text=str.upper(key),
+                                        master=self, fg_color="#b00606", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda: self.set_external_api(key)).grid(row=0, column=0, padx=(
+                                            20, 20), pady=(pady, 0))
+
+            pady += 100
+
+    def set_external_api(self, api: str) -> None:
+        dialog = customtkinter.CTkInputDialog(
+            text="Enter in your API key for " + str.upper(api) + ":", title="API Key Input")
+
+        text = dialog.get_input()  # waits for input
