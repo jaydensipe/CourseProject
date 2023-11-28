@@ -86,6 +86,24 @@
             ]
         },
         {
+            "tag": "get_weather",
+            "patterns": [
+                "what is the weather in",
+                "what is the weather",
+                "how is the weather",
+                "what is the temperature in",
+                "how is the temperature",
+                "what is the temperature",
+                "what is the weather like in",
+                "how is the weather like in",
+                "what is the temperature like in",
+                "how is the temperature like in"
+            ],
+            "responses": [
+                "The weather is {weather_description} and the temperature is {temp}°C."
+            ]
+        },
+        {
             "tag": "shut_down",
             "patterns": [
                 "shut down",

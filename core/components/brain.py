@@ -13,6 +13,7 @@ import pickle
 import numpy as np
 import random
 from external.lifx import LIFX
+from external.openweather import OpenWeather
 
 
 class Brain:
@@ -28,7 +29,6 @@ class Brain:
     words = pickle.load(open("core/training/intents/words.pkl", "rb"))
     classes = pickle.load(open("core/training/intents/classes.pkl", "rb"))
     model = load_model("core/training/intents/squire_assistant.keras")
-    external_api_tokens = {}
 
     def __init__(self, name: str, personality: str) -> None:
         self.name = name
@@ -47,7 +47,9 @@ class Brain:
         # Initialize LIFX
         global lifx
         lifx = LIFX()
-        self.external_api_tokens['lifx'] = lifx.token
+
+        global weather
+        weather = OpenWeather()
 
     # TODO: Update this to use the new LCEL
     def __initialize_gpt(self) -> None:
@@ -86,12 +88,15 @@ class Brain:
 
         # Match intent to an action and speak
         self.__match_intent(intent=intent, human_input=human_input)
-        Mouth.speak(self.__get_response(intent_list=intent))
 
     def __match_intent(self, intent, human_input: str = "") -> None:
         match (intent[0]["intent"]):
             case "turn_light_on" | "turn_light_off" | "set_light_color":
                 lifx.process_input(
+                    intent=intent[0]["intent"], human_input=human_input)
+                Mouth.speak(self.__get_response(intent_list=intent))
+            case "get_weather":
+                weather.process_input(
                     intent=intent[0]["intent"], human_input=human_input)
             case "shut_down":
                 os.kill(os.getpid(), signal.SIGTERM)

@@ -14,3 +14,11 @@ class Helpers:
         lemmatized_words = [token.lemma_ for token in sentence_words]
 
         return lemmatized_words
+
+    @staticmethod
+    def extract_location(sentence: str) -> str:
+        doc = nlp(sentence)
+        for ent in doc.ents:
+            if (ent.label_ == "GPE"):
+                return ent.text
+        return None

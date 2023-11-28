@@ -2,6 +2,7 @@ import datetime
 import customtkinter
 import handler
 from PIL import Image
+from external.external import save_external_api_tokens, get_external_api_tokens
 
 # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("Dark")
@@ -13,12 +14,11 @@ customtkinter.set_widget_scaling(float(1.3))
 
 
 class MainWindow(customtkinter.CTk):
-    def __init__(self, external_api_tokens: dict = {}, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Configure window
         self.title("Squire: Chat Assistant")
-        self.external_api_tokens = external_api_tokens
         self.last_sent_time_message = datetime.datetime.now()
         self.geometry(f"{1280}x{720}")
         self.minsize(800, 600)
@@ -157,14 +157,14 @@ class MainWindow(customtkinter.CTk):
 
     def load_external_api_buttons(self) -> None:
         pady = 0
-        for key, value in self.external_api_tokens.items():
-            if (value != ''):
+        for key, value in get_external_api_tokens().items():
+            if (value and value != ''):
                 customtkinter.CTkButton(text=str.upper(key),
-                                        master=self, fg_color="#06b006", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda: self.set_external_api(key)).grid(row=0, column=0, padx=(
+                                        master=self, fg_color="#06b006", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda key=key: self.set_external_api(key)).grid(row=0, column=0, padx=(
                                             20, 20), pady=(pady, 0))
             else:
                 customtkinter.CTkButton(text=str.upper(key),
-                                        master=self, fg_color="#b00606", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda: self.set_external_api(key)).grid(row=0, column=0, padx=(
+                                        master=self, fg_color="#b00606", border_width=2, text_color=("gray10", "#DCE4EE"), command=lambda key=key: self.set_external_api(key)).grid(row=0, column=0, padx=(
                                             20, 20), pady=(pady, 0))
 
             pady += 100
@@ -173,4 +173,6 @@ class MainWindow(customtkinter.CTk):
         dialog = customtkinter.CTkInputDialog(
             text="Enter in your API key for " + str.upper(api) + ":", title="API Key Input")
 
-        text = dialog.get_input()  # waits for input
+        save_external_api_tokens(api, dialog.get_input())
+
+        self.load_external_api_buttons()

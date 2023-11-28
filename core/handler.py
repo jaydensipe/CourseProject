@@ -19,10 +19,10 @@ def startup_squire() -> None:
     squire.awaken()
 
 
-def __startup_ui(external_apis: dict) -> None:
+def __startup_ui() -> None:
     global ui
 
-    ui = MainWindow(external_api_tokens=external_apis)
+    ui = MainWindow()
     ui.mainloop()
 
 
@@ -67,6 +67,6 @@ def __listen_with_mic() -> None:
 
 
 @staticmethod
-def start_threads(external_apis: dict) -> None:
-    ui_thread = threading.Thread(target=__startup_ui, args=(external_apis,))
+def start_threads() -> None:
+    ui_thread = threading.Thread(target=__startup_ui, args=())
     ui_thread.start()

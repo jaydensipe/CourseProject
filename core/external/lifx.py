@@ -2,14 +2,16 @@ import requests
 import os
 from colour import Color
 import webcolors
-from components.mouth import Mouth
+from external.external import get_external_api_tokens
 
 
 class LIFX:
     def __init__(self):
-        self.token = os.getenv("lifx_token")
+        self.token = get_external_api_tokens().get("lifx")
 
     def process_input(self, intent, human_input: str) -> None:
+        self.token = get_external_api_tokens().get("lifx")
+
         if (self.token == None or self.token == ""):
             raise Exception(
                 "Please enable and provide a LIFX token.")
