@@ -6,10 +6,10 @@ from components.mouth import Mouth
 
 class OpenWeather:
     def __init__(self):
-        self.token = get_external_api_tokens().get("openweathermap")
+        self.set_token()
 
     def process_input(self, intent, human_input: str) -> None:
-        self.token = get_external_api_tokens().get("openweathermap")
+        self.set_token()
 
         if (self.token == None or self.token == ""):
             raise Exception(
@@ -21,12 +21,17 @@ class OpenWeather:
             case _:
                 print("External Module (OpenWeatherMap): Cannot match intent.")
 
+    def set_token(self) -> str:
+        self.token = get_external_api_tokens().get("openweathermap")
+
     def __get_weather(self, human_input: str) -> None:
-        print(Helpers.extract_location(human_input))
         loader = WeatherDataLoader.from_params(
             [Helpers.extract_location(human_input).title()], openweathermap_api_key=self.token
         )
 
         documents = loader.load()
+        if (len(documents) == 0):
+            raise Exception("No weather data found.")
 
+        # Speak the weather data
         Mouth.speak(documents[0].page_content)

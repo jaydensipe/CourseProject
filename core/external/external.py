@@ -13,10 +13,7 @@ def save_external_api_tokens(api: str, new_value: str) -> None:
         raise Exception(
             "Please provide a valid value for the API token.")
 
-    print(external_api_tokens)
-    print(api)
     external_api_tokens[api] = new_value.strip()
-    print(external_api_tokens)
     with open("core/settings.json", "w") as f:
         json.dump({"api_keys": external_api_tokens}, f, indent=4)
 

@@ -51,7 +51,6 @@ class Brain:
         global weather
         weather = OpenWeather()
 
-    # TODO: Update this to use the new LCEL
     def __initialize_gpt(self) -> None:
         prompt = PromptTemplate(
             input_variables=["history", "human_input"],
@@ -143,7 +142,3 @@ class Brain:
                 break
 
         return result
-
-    # Reset the state of the brain to THINKING
-    def __reset_state(self) -> None:
-        self.current_state = Brain.BrainState.THINKING

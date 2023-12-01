@@ -7,10 +7,10 @@ from external.external import get_external_api_tokens
 
 class LIFX:
     def __init__(self):
-        self.token = get_external_api_tokens().get("lifx")
+        self.set_token()
 
     def process_input(self, intent, human_input: str) -> None:
-        self.token = get_external_api_tokens().get("lifx")
+        self.set_token()
 
         if (self.token == None or self.token == ""):
             raise Exception(
@@ -25,6 +25,9 @@ class LIFX:
                 self.__set_color(human_input)
             case _:
                 print("External Module (LIFX): Cannot match intent.")
+
+    def set_token(self) -> str:
+        self.token = get_external_api_tokens().get("lifx")
 
     def get_status(self) -> None:
         response = requests.get(

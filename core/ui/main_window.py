@@ -4,12 +4,8 @@ import handler
 from PIL import Image
 from external.external import save_external_api_tokens, get_external_api_tokens
 
-# Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_appearance_mode("Dark")
-
-# Themes: "blue" (standard), "green", "dark-blue"
 customtkinter.set_default_color_theme("core/ui/custom_theme.json")
-
 customtkinter.set_widget_scaling(float(1.3))
 
 

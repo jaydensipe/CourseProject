@@ -99,9 +99,7 @@
                 "what is the temperature like in",
                 "how is the temperature like in"
             ],
-            "responses": [
-                "The weather is {weather_description} and the temperature is {temp}°C."
-            ]
+            "responses": []
         },
         {
             "tag": "shut_down",
