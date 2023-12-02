@@ -5,6 +5,8 @@ from langchain.prompts import PromptTemplate
 from langchain.llms import OpenAI
 from enum import Enum
 from components.mouth import Mouth
+from external.apis.lifx import LIFX
+from external.apis.openweather import OpenWeather
 from helpers.helpers import Helpers
 from tensorflow.keras.models import load_model
 import os
@@ -12,8 +14,6 @@ import json
 import pickle
 import numpy as np
 import random
-from external.lifx import LIFX
-from external.openweather import OpenWeather
 
 
 class Brain:
@@ -40,16 +40,18 @@ class Brain:
         self.__load_external()
 
     def __load_external(self) -> None:
+        # Intialize external dependencies in here
+        
         # Initialize GPT
         global receptor
         receptor = self.__initialize_gpt()
 
         # Initialize LIFX
         global lifx
-        lifx = LIFX()
+        lifx = LIFX("lifx")
 
         global weather
-        weather = OpenWeather()
+        weather = OpenWeather("openweathermap")
 
     def __initialize_gpt(self) -> None:
         prompt = PromptTemplate(

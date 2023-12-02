@@ -7,6 +7,10 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.optimizers import SGD
 
+# Once you edit your intents in intents.json, run this file to retrain the model.
+# This file will create a words.pkl and classes.pkl file in the core/training/intents folder.
+# It will also create a squire_assistant.keras file in the same folder.
+
 nlp = spacy.load("en_core_web_sm")
 
 # Load intents.json file

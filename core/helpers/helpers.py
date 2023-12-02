@@ -1,5 +1,5 @@
 import spacy
-
+from colour import Color
 
 class Helpers:
 
@@ -22,3 +22,11 @@ class Helpers:
             if (ent.label_ == "GPE"):
                 return ent.text
         return None
+    
+    @staticmethod
+    def check_color(color) -> bool:
+        try:
+            Color(color)
+            return True
+        except ValueError:
+            return False

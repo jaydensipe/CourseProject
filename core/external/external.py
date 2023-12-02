@@ -1,13 +1,13 @@
 import json
 
-
+# Loads external API tokens from settings.json
 def load_external_api_tokens() -> None:
     global external_api_tokens
 
     with open("core/settings.json", "r") as f:
         external_api_tokens = json.load(f).get("api_keys")
 
-
+# Saves external API tokens to settings.json
 def save_external_api_tokens(api: str, new_value: str) -> None:
     if (new_value == None or new_value == ""):
         raise Exception(

@@ -1,6 +1,7 @@
 import datetime
 import customtkinter
 import handler
+from components.ears import Ears
 from PIL import Image
 from external.external import save_external_api_tokens, get_external_api_tokens
 
@@ -108,7 +109,7 @@ class MainWindow(customtkinter.CTk):
         self.entry.configure(state="disabled")
         self.main_button_1.configure(state="disabled")
 
-        handler.listen_with_mic()
+        Ears.listen_with_mic()
 
     def stop_listening(self) -> None:
         self.is_talking = False
