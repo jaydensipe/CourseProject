@@ -1,3 +1,5 @@
-# CourseProject
+# Squire AI Assistant - CourseProject
 
-Please fork this repository and paste the github link of your fork on Microsoft CMT. Detailed instructions are on Coursera under Week 1: Course Project Overview/Week 9 Activities.
+📖 P.O.C. Documentation can be found [here](https://github.com/jaydensipe/CourseProject/blob/main/SquireDocumentation.pdf).
+
+Squire is an AI (Artificial Intelligence) assistant built with modularity in mind to be able to add extra functionality easily. It was built using Python, along with spaCy, TensorFlow and LangChain.  
