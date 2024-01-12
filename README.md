@@ -7,4 +7,4 @@
 https://github.com/jaydensipe/CourseProject/assets/47132280/6abbdf2d-bda0-44a3-9d7c-dede9866df94
 
 
-Squire is an AI (Artificial Intelligence) assistant built with modularity in mind to be able to add extra functionality easily. It was built using Python, along with spaCy, TensorFlow and LangChain. It was created for a project in my UIUC master's program.
+Squire is an AI (Artificial Intelligence) assistant built with modularity in mind to be able to add extra functionality easily. It was built using Python, along with spaCy, TensorFlow and LangChain. Created for a school project for the masters program at the University of Illinois Urbana-Champaign.
